@@ -4,6 +4,7 @@ public class AnimationScripts : MonoBehaviour
 {
     private Animator animator;
     private CollisionTracker colliTracker;
+    private PlayerController playerController;
 
     public SpriteRenderer spr;
 
@@ -12,6 +13,7 @@ public class AnimationScripts : MonoBehaviour
         animator = GetComponent<Animator>();
         colliTracker = GetComponent<CollisionTracker>();
         spr = GetComponent<SpriteRenderer>();
+        playerController = GetComponent<PlayerController>();
     }
     void Update()
     {
@@ -22,6 +24,8 @@ public class AnimationScripts : MonoBehaviour
         animator.SetFloat("AxisX", x);
         animator.SetFloat("AxisY", y);
         animator.SetFloat("VerticalAxis", vy);
+        
+        animator.SetBool("isDasing", playerController.isDashing);
     }
     public void AnimatorTrigger(string name)
     {

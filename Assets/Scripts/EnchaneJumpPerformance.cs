@@ -5,16 +5,20 @@ public class EnchaneJumpPerformance : MonoBehaviour
     public float gravityMutiplier = 2f;
     public float lowGravityMutiplier = 7f;
     public float maxFallSpeed = 25f;
-    public Rigidbody2D rigi;
+    private Rigidbody2D rigi;
+    private PlayerController player;
 
     void Start()
     {
         rigi = GetComponent<Rigidbody2D>();
+        player = GetComponent<PlayerController>();
     }
 
     // Update is called once per frame
     void Update()
     {
+if (player != null && (player.isDashing || player.wallJumped || player.hasDashed))
+    return;
         if (rigi.linearVelocity.y < 0)
         {
             rigi.linearVelocity += Vector2.up * Physics2D.gravity.y * gravityMutiplier * Time.deltaTime;
