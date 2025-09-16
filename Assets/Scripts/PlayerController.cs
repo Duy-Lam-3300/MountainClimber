@@ -9,7 +9,6 @@ public class PlayerController : MonoBehaviour
     public PlayerData playerData;
     private AnimationScripts animationScripts;
     private Rigidbody2D rb;
-    private EnchaneJumpPerformance enchaneJumpPerformance;
     private CollisionTracker colliTracker;
     // private InputSystem_Actions playerInputSystem;
     public ParticleSystem jumpParticale;
@@ -19,12 +18,8 @@ public class PlayerController : MonoBehaviour
 
 
     private int side = 1;
-    public bool hasDashed;
-    public bool groundTouched=false;
+    public bool groundTouched = false;
     public bool wallJumped;
-    public bool isDashing;
-
-
 
 
     void Start()
@@ -32,7 +27,7 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         animationScripts = GetComponent<AnimationScripts>();
         colliTracker = GetComponent<CollisionTracker>();
-        
+        playerData.canMoveAble = true;
     }
     void Update()
     {
@@ -44,22 +39,17 @@ public class PlayerController : MonoBehaviour
         Vector2 dir = new Vector2(x, y);
         // Time.timeScale = 0.5f;
         animationScripts.SetAxisParamater(x, y, rb.linearVelocity.y);
-        Walk(dir);
+        if (Mathf.Abs(x)>0)
+            Walk(dir);  
 
-        if (colliTracker.onGround && !isDashing)
+        if (colliTracker.onGround)
         {
+
+
+        }
         
-            
-        }
-         if (Input.GetButtonDown("Dash") && !hasDashed)
-        {
-            if (xRaw != 0 || yRaw != 0)
-            {
-                Dash(xRaw, yRaw);
-                return;
-            }
-        }
-        if (Input.GetButtonDown("Jump"))
+        // if (Input.GetButtonDown("Jump"))
+        if (Input.GetButtonDown("Vertical"))
         {
             if (colliTracker.onGround)
             {
@@ -67,7 +57,7 @@ public class PlayerController : MonoBehaviour
                 Jump(Vector2.up);
             }
         }
-       
+
 
         if (colliTracker.onGround && !groundTouched)
         {
@@ -92,15 +82,16 @@ public class PlayerController : MonoBehaviour
 
     public void GroundTouch()
     {
-        hasDashed = false;
-        isDashing = false;
+       
     }
 
     private void Walk(Vector2 dir)
     {
+        if (!playerData.canMoveAble) return;
         if (!wallJumped)
         {
-            rb.linearVelocity = new Vector2(dir.x * playerData.moveSpeed, rb.linearVelocity.y);
+            rb.linearVelocity = new Vector2(dir.x * playerData.moveSpeed,  rb.linearVelocity.y);
+
         }
         else
         {
@@ -110,45 +101,12 @@ public class PlayerController : MonoBehaviour
     }
     private void Jump(Vector2 dir)
     {
-        if (isDashing || hasDashed) return; 
+     
         animationScripts.AnimatorTrigger("Jump");
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0);
         rb.linearVelocity += dir * playerData.jumpForce;
 
 
     }
-   private void Dash(float x, float y)
-{
-    if (colliTracker.onGround && Input.GetButton("Jump")) return;
 
-    Vector2 dir = new Vector2(x, y).normalized;
-
-    hasDashed = true;
-    isDashing = true;
-    wallJumped = true;
-
-    animationScripts.AnimatorTrigger("dashing");
-
-    rb.gravityScale = 0; // turn off gravity
-    rb.linearVelocity = dir * playerData.dashForce;
-
-    StartCoroutine(DashWait());
-}
-
-IEnumerator DashWait()
-{
-        StartCoroutine(GroundDash());
-    yield return new WaitForSeconds(playerData.dashTime);
-
-    rb.gravityScale = 3;
-    rb.linearVelocity = Vector2.zero;
-    isDashing = false;
-    wallJumped = false;
-}
-    IEnumerator GroundDash()
-    {
-        yield return new WaitForSeconds(0.15f);
-        if(colliTracker.onGround)
-            hasDashed = false;    
-    }
 }

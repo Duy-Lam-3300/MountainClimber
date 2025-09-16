@@ -19,4 +19,12 @@ public class PlayerData : ScriptableObject
     public float dashTime;
     public float dashCoolTime;
 
+    [Space(20)]
+    [Header("Data checker")]
+    public bool canMoveAble;
+    public bool isGrappling;
+
+
+
+
 }

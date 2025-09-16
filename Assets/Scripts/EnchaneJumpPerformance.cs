@@ -7,6 +7,7 @@ public class EnchaneJumpPerformance : MonoBehaviour
     public float maxFallSpeed = 25f;
     private Rigidbody2D rigi;
     private PlayerController player;
+    public PlayerData playerData;
 
     void Start()
     {
@@ -17,13 +18,13 @@ public class EnchaneJumpPerformance : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (player != null && (player.isDashing || player.wallJumped || player.hasDashed))
+        if (player != null && (player.wallJumped ||playerData.isGrappling))
             return;
         if (rigi.linearVelocity.y < 0)
         {
             rigi.linearVelocity += Vector2.up * Physics2D.gravity.y * gravityMutiplier * Time.deltaTime;
         }
-        else if (rigi.linearVelocity.y > 0 && !Input.GetButton("Jump"))
+        else if (rigi.linearVelocity.y > 0 && !Input.GetButton("Vertical"))
         {
             rigi.linearVelocity += Vector2.up * Physics2D.gravity.y * lowGravityMutiplier * Time.deltaTime;
 

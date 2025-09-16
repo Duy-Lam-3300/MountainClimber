@@ -19,3 +19,4 @@ MonoBehaviour:
   dashForce: 10
   dashTime: 0.3
   dashCoolTime: 0
+  canMoveAble: 1

@@ -25,7 +25,6 @@ public class AnimationScripts : MonoBehaviour
         animator.SetFloat("AxisY", y);
         animator.SetFloat("VerticalAxis", vy);
         
-        animator.SetBool("isDasing", playerController.isDashing);
     }
     public void AnimatorTrigger(string name)
     {

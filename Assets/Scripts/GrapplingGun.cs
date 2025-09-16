@@ -1,9 +1,13 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class GrapplingGun : MonoBehaviour
 {
     [Header("Scripts:")]
     public GrapplingRope grappleRope;
+    public PlayerData playerData;
+
+
     [Header("Layer Settings:")]
     [SerializeField] private bool grappleToAll = false;
     [SerializeField] private LayerMask grappleMask; // Set this in Inspector (e.g. Wall, Ground, etc.)
@@ -71,6 +75,8 @@ public class GrapplingGun : MonoBehaviour
         else if (Input.GetKey(KeyCode.Mouse0))
         {
             Debug.Log("2");
+            playerData.canMoveAble = false;
+            playerData.isGrappling = true;
 
             if (grappleRope.enabled)
             {
@@ -93,10 +99,14 @@ public class GrapplingGun : MonoBehaviour
         else if (Input.GetKeyUp(KeyCode.Mouse0))
         {
             Debug.Log("3");
+            playerData.canMoveAble = true;
 
             grappleRope.enabled = false;
             m_springJoint2D.enabled = false;
+            playerData.isGrappling = false;
+
             ballRigidbody.gravityScale = 1;
+
         }
         else
         {
