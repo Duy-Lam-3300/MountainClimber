@@ -1,6 +1,7 @@
 using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
@@ -39,15 +40,15 @@ public class PlayerController : MonoBehaviour
         Vector2 dir = new Vector2(x, y);
         // Time.timeScale = 0.5f;
         animationScripts.SetAxisParamater(x, y, rb.linearVelocity.y);
-        if (Mathf.Abs(x)>0)
-            Walk(dir);  
+        if (Mathf.Abs(x) > 0)
+            Walk(dir);
 
         if (colliTracker.onGround)
         {
 
 
         }
-        
+
         // if (Input.GetButtonDown("Jump"))
         if (Input.GetButtonDown("Vertical"))
         {
@@ -82,15 +83,15 @@ public class PlayerController : MonoBehaviour
 
     public void GroundTouch()
     {
-       
+
     }
 
     private void Walk(Vector2 dir)
     {
-        if (!playerData.canMoveAble) return;
+        if (playerData.isGrappling) return;
         if (!wallJumped)
         {
-            rb.linearVelocity = new Vector2(dir.x * playerData.moveSpeed,  rb.linearVelocity.y);
+            rb.linearVelocity = new Vector2(dir.x * playerData.moveSpeed, rb.linearVelocity.y);
 
         }
         else
@@ -101,7 +102,7 @@ public class PlayerController : MonoBehaviour
     }
     private void Jump(Vector2 dir)
     {
-     
+
         animationScripts.AnimatorTrigger("Jump");
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0);
         rb.linearVelocity += dir * playerData.jumpForce;

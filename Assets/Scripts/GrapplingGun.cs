@@ -28,6 +28,11 @@ public class GrapplingGun : MonoBehaviour
     [SerializeField] private bool hasMaxDistance = true;
     [SerializeField] private float maxDistance = 4;
 
+    [Header("Max distance range:")]
+    public int segments = 100;         // smoothness of circle
+    public Color circleColor = new Color(1, 1, 1, 0.2f); // faint white with transparency
+
+
     [Header("Launching")]
     [SerializeField] private bool launchToPoint = true;
     [SerializeField] private LaunchType Launch_Type = LaunchType.Transform_Launch;
@@ -39,11 +44,7 @@ public class GrapplingGun : MonoBehaviour
     [SerializeField] private float targetFrequency = 3;
 
 
-    private enum LaunchType
-    {
-        Transform_Launch,
-        Physics_Launch,
-    }
+
 
     [Header("Component Refrences:")]
     public SpringJoint2D m_springJoint2D;
@@ -52,14 +53,36 @@ public class GrapplingGun : MonoBehaviour
     [HideInInspector] public Vector2 DistanceVector;
     Vector2 Mouse_FirePoint_DistanceVector;
 
-    public Rigidbody2D ballRigidbody;
+    public Rigidbody2D playerRigi;
+
+    private enum LaunchType
+    {
+        Transform_Launch,
+        Physics_Launch,
+    }
+    private LineRenderer lineRenderer;
+
 
 
     private void Start()
     {
         grappleRope.enabled = false;
         m_springJoint2D.enabled = false;
-        ballRigidbody.gravityScale = 1;
+        playerRigi.gravityScale = 1;
+
+
+        lineRenderer = GetComponent<LineRenderer>();
+        lineRenderer.loop = true;           // close the circle
+        lineRenderer.useWorldSpace = false; // relative to object
+        lineRenderer.startWidth = 0.02f;
+        lineRenderer.endWidth = 0.02f;
+        lineRenderer.positionCount = segments;
+
+        lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
+        lineRenderer.startColor = circleColor;
+        lineRenderer.endColor = circleColor;
+
+        DrawCircle();
     }
 
     private void Update()
@@ -68,15 +91,15 @@ public class GrapplingGun : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
-            Debug.Log("1");
-
             SetGrapplePoint();
         }
         else if (Input.GetKey(KeyCode.Mouse0))
         {
-            Debug.Log("2");
+
             playerData.canMoveAble = false;
             playerData.isGrappling = true;
+
+
 
             if (grappleRope.enabled)
             {
@@ -86,6 +109,8 @@ public class GrapplingGun : MonoBehaviour
             {
                 RotateGun(m_camera.ScreenToWorldPoint(Input.mousePosition), false);
             }
+            float x = Input.GetAxis("Horizontal");
+            playerRigi.AddForce(new Vector2(x * 1f, 0)*Time.deltaTime);
 
             if (launchToPoint && grappleRope.isGrappling)
             {
@@ -98,14 +123,13 @@ public class GrapplingGun : MonoBehaviour
         }
         else if (Input.GetKeyUp(KeyCode.Mouse0))
         {
-            Debug.Log("3");
             playerData.canMoveAble = true;
 
             grappleRope.enabled = false;
             m_springJoint2D.enabled = false;
             playerData.isGrappling = false;
 
-            ballRigidbody.gravityScale = 1;
+            playerRigi.gravityScale = 1;
 
         }
         else
@@ -113,6 +137,27 @@ public class GrapplingGun : MonoBehaviour
             RotateGun(m_camera.ScreenToWorldPoint(Input.mousePosition), true);
         }
     }
+    void LateUpdate()
+{
+    if (m_springJoint2D.enabled)
+    {
+        Vector2 toPlayer = playerRigi.position - grapplePoint;
+        float angle = Vector2.SignedAngle(Vector2.down, toPlayer);
+
+            // Restrict swing between -90° and +90° (half circle under anchor)
+            if (angle < -100f || angle > 100f)
+            {
+                
+                playerRigi.linearVelocity = Vector2.zero;
+                playerRigi.gravityScale = 8f;
+            }
+            else
+            {
+                playerRigi.gravityScale = 1f;
+                
+            }
+    }
+}
 
     void RotateGun(Vector3 lookPoint, bool allowRotationOverTime)
     {
@@ -140,6 +185,7 @@ public class GrapplingGun : MonoBehaviour
            );
         if (_hit.collider != null)
         {
+
             grapplePoint = _hit.point;
             DistanceVector = grapplePoint - (Vector2)gunPivot.position;
             grappleRope.enabled = true;
@@ -171,8 +217,8 @@ public class GrapplingGun : MonoBehaviour
         {
             if (Launch_Type == LaunchType.Transform_Launch)
             {
-                ballRigidbody.gravityScale = 0;
-                ballRigidbody.linearVelocity = Vector2.zero;
+                playerRigi.gravityScale = 0;
+                playerRigi.linearVelocity = Vector2.zero;
             }
             if (Launch_Type == LaunchType.Physics_Launch)
             {
@@ -181,6 +227,21 @@ public class GrapplingGun : MonoBehaviour
                 m_springJoint2D.frequency = launchSpeed;
                 m_springJoint2D.enabled = true;
             }
+        }
+    }
+
+    void DrawCircle()
+    {
+        lineRenderer.positionCount = segments;
+        float angleStep = 360f / segments;
+
+        for (int i = 0; i < segments; i++)
+        {
+            float angle = Mathf.Deg2Rad * angleStep * i;
+            float x = Mathf.Cos(angle) * maxDistance;
+            float y = Mathf.Sin(angle) * maxDistance;
+
+            lineRenderer.SetPosition(i, firePoint.position);
         }
     }
 
